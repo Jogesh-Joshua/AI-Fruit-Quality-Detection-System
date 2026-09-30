@@ -4,7 +4,7 @@ FROM python:3.10-slim
 # Install Node.js (required for the Express server) and OpenCV system dependencies
 RUN apt-get update && apt-get install -y \
     curl \
-    libgl1-mesa-glx \
+    libgl1 \
     libglib2.0-0 \
     && curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
     && apt-get install -y nodejs \
