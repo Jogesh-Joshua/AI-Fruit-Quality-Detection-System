@@ -14,4 +14,3 @@ backend/uploads/
 # ML
 ml/dataset/
 ml/__pycache__/
-ml/model/*.keras
