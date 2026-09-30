@@ -1,0 +1,17 @@
+node_modules/
+.env
+.env.local
+.DS_Store
+
+# Frontend
+frontend/.next/
+frontend/node_modules/
+
+# Backend
+backend/node_modules/
+backend/uploads/
+
+# ML
+ml/dataset/
+ml/__pycache__/
+ml/model/*.keras
