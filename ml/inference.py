@@ -32,7 +32,7 @@ logging.getLogger("tensorflow").setLevel(logging.ERROR)
 
 # ── Paths ────────────────────────────────────────────────────────────────────
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-MODEL_PATH = os.path.join(SCRIPT_DIR, "model", "fruit_quality_model.keras")
+MODEL_PATH = os.path.join(SCRIPT_DIR, "model", "fruit_quality_model.tflite")
 
 # ── Constants ────────────────────────────────────────────────────────────────
 IMAGE_SIZE = (224, 224)          # Input size expected by the model
@@ -73,17 +73,27 @@ def preprocess_image(image_path: str) -> np.ndarray:
 # ─────────────────────────────────────────────────────────────────────────────
 
 def load_model():
-    """Load the trained Keras model from disk."""
-    import tensorflow as tf  # Lazy import to keep startup fast in demo mode
-    model = tf.keras.models.load_model(MODEL_PATH)
-    return model
+    """Load the trained TFLite model from disk."""
+    try:
+        import tflite_runtime.interpreter as tflite
+    except ImportError:
+        import tensorflow.lite as tflite
+    interpreter = tflite.Interpreter(model_path=MODEL_PATH)
+    interpreter.allocate_tensors()
+    return interpreter
 
 
 def run_inference_with_model(image_path: str) -> dict:
     """Full inference using the trained model."""
     img_batch = preprocess_image(image_path)
-    model = load_model()
-    predictions = model.predict(img_batch, verbose=0)[0]  # shape: (3,)
+    interpreter = load_model()
+    
+    input_details = interpreter.get_input_details()
+    output_details = interpreter.get_output_details()
+    
+    interpreter.set_tensor(input_details[0]['index'], img_batch)
+    interpreter.invoke()
+    predictions = interpreter.get_tensor(output_details[0]['index'])[0]  # shape: (2,)
 
     pred_idx = int(np.argmax(predictions))
     confidence = float(predictions[pred_idx])
